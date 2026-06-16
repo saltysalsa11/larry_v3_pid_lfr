@@ -1,1 +1,96 @@
+#include <QTRSensors.h>
 
+// Sensor Setup
+QTRSensors qtr;
+const uint8_t SensorCount = 8;
+uint16_t sensorValues[SensorCount];
+
+// Motor A (Right) Pins
+const int PWMA = 3;
+const int AIN2 = 5;
+const int AIN1 = 4;
+
+// Motor B (Left) Pins
+const int BIN1 = 9;
+const int BIN2 = 8;
+const int PWMB = 6;
+
+// PID Constants (Start with these and tune)
+float Kp = 0.075; // Proportional Gain
+float Ki = 0; // Integral Gain (Optional, usually very small)
+float Kd = 0.3;   // Derivative Gain (The "Gradient")
+
+int P, I, D, lastError = 0;
+const int baseSpeed = 135; // Base speed for motors (0-255)
+const int maxSpeed = 255;  // Maximum speed limit
+
+void setup() {
+  // 1. Configure Sensors based on your drawing
+  qtr.setTypeRC();
+  // Order: S8, S7, S6, S5, S4, S3, S2, S1
+  qtr.setSensorPins((const uint8_t[]){12, 11, A0, A1, A2, A3, A4, A5}, SensorCount);
+  
+  // 2. Configure Motor Pins
+  pinMode(PWMA, OUTPUT); pinMode(AIN1, OUTPUT); pinMode(AIN2, OUTPUT);
+  pinMode(PWMB, OUTPUT); pinMode(BIN1, OUTPUT); pinMode(BIN2, OUTPUT);
+
+  // 3. Calibration Phase
+  delay(500);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH); 
+  for (uint16_t i = 0; i < 400; i++) {
+    qtr.calibrate();
+  }
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // 1. Get position (0-7000)
+  uint16_t position = qtr.readLineWhite(sensorValues);
+
+  // 2. Calculate Error (Target is center: 3500)
+  int error = 3500 - position;
+
+  // 3. PID Calculations
+  P = error;
+  I = I + error;
+  D = error - lastError;
+  lastError = error;
+
+  int motorSpeed = (Kp * P) + (Ki * I) + (Kd * D);
+
+  // 4. Determine Individual Motor Speeds
+  int leftMotorSpeed = baseSpeed - motorSpeed;
+  int rightMotorSpeed = baseSpeed + motorSpeed;
+
+  // 5. Constrain speeds to PWM limits
+  leftMotorSpeed = constrain(leftMotorSpeed, 0, maxSpeed);
+  rightMotorSpeed = constrain(rightMotorSpeed, 0, maxSpeed);
+
+  driveMotors(leftMotorSpeed, rightMotorSpeed);
+
+  for (uint8_t i = 0; i < SensorCount; i++)
+  {
+    Serial.print(sensorValues[i]);
+    Serial.print('\t');
+  }
+  Serial.print(leftMotorSpeed);
+  Serial.print('\t');
+  Serial.print(rightMotorSpeed);
+  Serial.print('\t');
+  Serial.println(position);
+
+}
+
+void driveMotors(int left, int right) {
+  // Left Motor Logic (Motor B)
+  digitalWrite(BIN1, HIGH);
+  digitalWrite(BIN2, LOW);
+  analogWrite(PWMB, left);
+
+  // Right Motor Logic (Motor A)
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
+  analogWrite(PWMA, right);
+}
