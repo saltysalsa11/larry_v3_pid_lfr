@@ -1,1 +1,21 @@
 
+## v3.1 system observations and potential fixes
+
+1. no automatic calibration sequence, making it slow to test and develop. sensors need to be manually calibrated before every run.
+2. jitters on straight lines, as observed in the video. perhaps due to 
+3. motors rated up to 12v. battery pack consists of 2x 18650 3.7v li ion battery's leading to slower track completion times
+4. chassis flex causes the sensor array to shift away from being parallel to the ground leading to a direction bias. can be fixed by manually adjusting before test runs.
+5. PID constants need further tuning to remove the jitters
+
+
+## v3.0 fixes
+1. adjusting the alignment of the qtr8rc sensors seemed to change the results dramatically, (from barely being able to tell the track to getting a pretty decent read on it)
+2. one of the wheels kept falling off, stuffing a tissue paper in the wheel knob seemed to fix that problem.
+3. PID constants further tuned, it is current
+
+## things that are going well
+
+1. tb6612fng motor driver unit is an efficient upgrade from v2's l293n motor driver unit. leading to longer run times, less charging and absolutely no heating issues.
+
+
+## verdict
