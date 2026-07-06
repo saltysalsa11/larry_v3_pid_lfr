@@ -15,7 +15,7 @@ const int BIN1 = 9;
 const int BIN2 = 8;
 const int PWMB = 6;
 
-// PID Constants (Start with these and tune)
+// PID Constants
 float Kp = 0.075; // Proportional Gain
 float Ki = 0; // Integral Gain (Optional, usually very small)
 float Kd = 0.3;   // Derivative Gain (The "Gradient")
@@ -25,7 +25,7 @@ const int baseSpeed = 135; // Base speed for motors (0-255)
 const int maxSpeed = 255;  // Maximum speed limit
 
 void setup() {
-  // 1. Configure Sensors based on your drawing
+  // 1. Configure Sensors
   qtr.setTypeRC();
   // Order: S8, S7, S6, S5, S4, S3, S2, S1
   qtr.setSensorPins((const uint8_t[]){12, 11, A0, A1, A2, A3, A4, A5}, SensorCount);
